@@ -1,0 +1,30 @@
+/* Loader Css */
+.dots {
+   width: 4.5px;
+   height: 4.5px;
+   border-radius: 50%;
+   color: #3992d3;
+   box-shadow: 21.3px 0 0 7.8px, 42.6px 0 0 3.4px, 63.900000000000006px 0 0 0;
+   transform: translateX(-42.6px);
+   animation: dots-ijr34dmd 0.5s infinite alternate linear;
+}
+
+@keyframes dots-ijr34dmd {
+   50% {
+      box-shadow: 21.3px 0 0 3.4px, 42.6px 0 0 7.8px, 63.900000000000006px 0 0 3.4px;
+   }
+
+   100% {
+      box-shadow: 21.3px 0 0 0, 42.6px 0 0 3.4px, 63.900000000000006px 0 0 7.8px;
+   }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  50% { opacity: 0.5; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
