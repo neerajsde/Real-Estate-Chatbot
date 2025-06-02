@@ -2,11 +2,32 @@
 
 **Find the perfect property with suggestions based on your preferences.**
 
+--- 
+## WebAPP Preview
+- Home Page
+![Homepage Preview](https://res.cloudinary.com/do1xweis7/image/upload/v1748886201/REAL-ESTATE-AI/Screenshot_2025-06-02_230841_x9cpg4.png)
+
+- ChatBot UI
+![ChatBot Preview](https://res.cloudinary.com/do1xweis7/image/upload/v1748886198/REAL-ESTATE-AI/Screenshot_2025-06-02_230932_wqao4d.png)
+
+- Filter
+![Filter Page](https://res.cloudinary.com/do1xweis7/image/upload/v1748886198/REAL-ESTATE-AI/Screenshot_2025-06-02_230957_p4enke.png)
+
+- Most Searched Properties Section
+![Most Searched Section](https://res.cloudinary.com/do1xweis7/image/upload/v1748886197/REAL-ESTATE-AI/Screenshot_2025-06-02_231042_fkgebb.png)
+
+- Login Page
+![Login Page](https://res.cloudinary.com/do1xweis7/image/upload/v1748886812/REAL-ESTATE-AI/Screenshot_2025-06-02_231944_oeiwwk.png)
+
+- User Settings Page
+![user Settings page](https://res.cloudinary.com/do1xweis7/image/upload/v1748886812/REAL-ESTATE-AI/Screenshot_2025-06-02_232134_tjjf2p.png)
+
 ---
 
 ## Table of Contents
 
 - [Real Estate Chatbot \& Property Recommendation Web App](#real-estate-chatbot--property-recommendation-web-app)
+  - [WebAPP Preview](#webapp-preview)
   - [Table of Contents](#table-of-contents)
   - [Project Overview](#project-overview)
   - [Features \& Functionality](#features--functionality)
@@ -92,8 +113,8 @@ Before running this project locally, make sure you have:
 - **1. Clone the Repository**
 
 ```ini
-git clone https://github.com/yourusername/real-estate-chatbot.git
-cd real-estate-chatbot
+git clone https://github.com/neerajsde/Real-Estate-Chatbot.git
+cd Real-Estate-Chatbot
 ```
 - **2. Backend Setup**
   
