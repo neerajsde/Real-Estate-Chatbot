@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/logo.png";
-import UserMenu from "../common/userMenu";
+import UserMenu from "../common/UserMenu";
 import { FaRegHeart } from "react-icons/fa";
 
 const Navbar = () => {
