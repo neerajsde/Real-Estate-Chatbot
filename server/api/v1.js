@@ -3,6 +3,7 @@ const router = express.Router();
 import userRoutes from "../routes/user.js";
 import propertyRoutes from "../routes/property.js";
 import chatRouter from "../routes/chat.js";
+import { verifyrequest } from '../middlewares/verifyRequest.js';
 
 router.get('/', (req, res) => {
     res.status(200).json({
@@ -15,8 +16,9 @@ router.get('/', (req, res) => {
     });
 })
 
-router.use('/users', userRoutes);
-router.use('/property', propertyRoutes);
-router.use('/chats', chatRouter);
+
+router.use('/users', verifyrequest, userRoutes);
+router.use('/property', verifyrequest, propertyRoutes);
+router.use('/chats',verifyrequest, chatRouter);
 
 export default router;

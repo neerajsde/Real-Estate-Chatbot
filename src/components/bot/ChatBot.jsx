@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoReload } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addMessage,
@@ -8,228 +8,137 @@ import {
 } from "../../features/chat/chatSlice";
 import mira_profile from "../../assets/mira_profile.jpg";
 import apiHandler from "../../utils/apiHandler";
-import { Link, useNavigate } from "react-router-dom";
 import { TbWindowMinimize } from "react-icons/tb";
+import toast from "react-hot-toast";
+import DotLoader from "../spinner/DotLoader";
 
 export default function Chatbot() {
-  const { isAuthenticated, user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const chatsHistory = useSelector((state) => state.chat.messages);
   const [status, setStatus] = useState("online");
-  const chatContainerRef = useRef(null);
-  const navigate = useNavigate();
-  const preferences = useRef({
-    location: "",
-    budget: "",
-    bedrooms: "",
-    size: "",
-    amenities: "",
-  });
-
   const [input, setInput] = useState("");
-  const [stepIndex, setStepIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const chatContainerRef = useRef(null);
 
-  const messages = useSelector((state) => state.chat.messages);
-
-  const questions = [
-    "First, what location are you interested in?",
-    "What's your budget range?",
-    "How many bedrooms are you looking for?",
-    "Do you have a preferred size in square feet?",
-    "Any specific amenities you want? (e.g. Pool, Gym, Parking)",
-  ];
-
-  useEffect(() => {
-    if (messages.length > 0) return;
-
-    setStatus("typing...");
-
-    const initialMsgs = [
-      {
-        sender: "bot",
-        message: `Welcome${
-          isAuthenticated && user ? ` ${user.name.split(" ")[0]}` : ""
-        } 😊\n\nI'm here to help you find your ideal property.`,
-      },
-    ];
-
-    // Store timeout IDs so we can clear them on unmount
-    const timeoutIds = [];
-
-    // Add welcome messages
-    initialMsgs.forEach((msg, idx) => {
-      const id = setTimeout(() => dispatch(addMessage(msg)), idx * 500);
-      timeoutIds.push(id);
-    });
-
-    // Ask first question
-    const questionTimeout = setTimeout(() => {
-      dispatch(addMessage({ sender: "bot", message: questions[0] }));
-    }, initialMsgs.length * 500 + 500);
-    timeoutIds.push(questionTimeout);
-
-    // Set status to online
-    const statusTimeout = setTimeout(() => {
-      setStatus("online");
-    }, initialMsgs.length * 500 + 1000);
-    timeoutIds.push(statusTimeout);
-
-    // Cleanup on unmount or re-render
-    return () => {
-      timeoutIds.forEach(clearTimeout);
-    };
-  }, []);
-
-  // Auto-scroll to latest message
   useEffect(() => {
     chatContainerRef.current?.scrollTo({
       top: chatContainerRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages]);
+  }, [chatsHistory, loading]);
 
-  // Optimized sendMessage function
+  const hasGreetedRef = useRef(false);
+
+  useEffect(() => {
+    const greetUser = async () => {
+      if (!hasGreetedRef.current && chatsHistory.length === 0) {
+        hasGreetedRef.current = true;
+        const greeting = isAuthenticated ? `Hi, My name is ${user.name}` : "Hi";
+        try {
+          setLoading(true);
+          dispatch(addMessage({ role: 'user', parts: [{ text: greeting }] }))
+          const response = await apiHandler("/chats/bot", "POST", {
+            userQuery: greeting,
+            chatsHistory: chatsHistory,
+          });
+
+          if (response.success) {
+            dispatch(addMessage(response.data));
+          }
+        } catch (err) {
+          console.error("Greeting Error:", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    greetUser();
+  }, [isAuthenticated, chatsHistory.length]);
+
   const sendMessage = async () => {
-    setStatus("typing...");
     if (!input.trim()) return;
 
     const trimmedInput = input.trim();
-    dispatch(addMessage({ sender: "user", message: trimmedInput }));
+    const newMessage = { role: "user", parts: [{ text: trimmedInput }] };
+
+    dispatch(addMessage(newMessage));
     setInput("");
+    setStatus("typing...");
+    setLoading(true);
 
-    const greetings = ["hi", "hello", "hey", "good morning", "good evening"];
-    if (greetings.some((word) => input.toLowerCase().includes(word))) {
-      dispatch(
-        addMessage({
-          sender: "bot",
-          message: `Hello! How can I assist you with finding a property today?\n\n${questions[stepIndex]}`,
-        })
-      );
-      return;
-    }
+    try {
+      const response = await apiHandler("/chats/bot", "POST", {
+        userQuery: trimmedInput,
+        chatsHistory: [...chatsHistory, newMessage],
+      });
 
-    const currentStep = stepIndex;
-
-    // Validation logic
-    const isNumber = (val) => /^\d+(\.\d+)?$/.test(val);
-
-    // Step-specific validation
-    if (currentStep === 1 && !isNumber(trimmedInput)) {
-      dispatch(
-        addMessage({
-          sender: "bot",
-          message:
-            "💰 Please enter a valid numeric value for budget (e.g. 50000).",
-        })
-      );
-      setStatus("online");
-      return;
-    }
-
-    if (
-      currentStep === 2 &&
-      (!Number.isInteger(Number(trimmedInput)) || Number(trimmedInput) <= 0)
-    ) {
-      dispatch(
-        addMessage({
-          sender: "bot",
-          message: "🛏️ Please enter a valid number of bedrooms (e.g. 2).",
-        })
-      );
-      setStatus("online");
-      return;
-    }
-
-    if (currentStep === 3 && !isNumber(trimmedInput)) {
-      dispatch(
-        addMessage({
-          sender: "bot",
-          message:
-            "📐 Please enter a valid numeric size in square feet (e.g. 1200).",
-        })
-      );
-      setStatus("online");
-      return;
-    }
-
-    // Store the preference based on current step
-    if (currentStep === 0) preferences.current.location = trimmedInput;
-    if (currentStep === 1) preferences.current.budget = trimmedInput;
-    if (currentStep === 2) preferences.current.bedrooms = trimmedInput;
-    if (currentStep === 3) preferences.current.size = trimmedInput;
-    if (currentStep === 4) preferences.current.amenities = trimmedInput;
-
-    const nextStep = currentStep + 1;
-
-    // Show next question or summary
-    setTimeout(() => {
-      if (nextStep < questions.length) {
-        dispatch(addMessage({ sender: "bot", message: questions[nextStep] }));
-        setStepIndex(nextStep);
-        setStatus("online");
+      if (response.success) {
+        dispatch(addMessage(response.data));
       } else {
-        dispatch(
-          addMessage({
-            sender: "bot",
-            message: `Thanks! Here's a quick summary of your preferences:\n\n📍 Location: ${preferences.current.location}\n💰 Budget: ${preferences.current.budget}\n🛏️ Bedrooms: ${preferences.current.bedrooms}\n📐 Size: ${preferences.current.size}\n✨ Amenities: ${preferences.current.amenities}`,
-          })
-        );
-        dispatch(
-          addMessage({
-            sender: "bot",
-            message:
-              "We'll start searching properties based on your preferences. ✅",
-          })
-        );
-        serachRecommendation();
+        toast.error(response.message || "Something went wrong.");
       }
-    }, 1000);
+    } catch (error) {
+      toast.error("Failed to fetch response.");
+      console.error("SendMessage Error:", error);
+    } finally {
+      setStatus("online");
+      setLoading(false);
+    }
   };
 
-  async function serachRecommendation() {
-    setStatus("typing...");
-    const payload = {
-      ...preferences.current,
-      amenities: preferences.current.amenities.split(","),
-    };
-    let res;
-    if (isAuthenticated) {
-      res = await apiHandler("/chats/search/me", "POST", payload);
-    } else {
-      res = await apiHandler("/chats/search", "POST", payload);
-    }
-    if (res.success) {
-      localStorage.setItem("RecommendedProperties", JSON.stringify(res.data));
-      const url = window.location;
-      dispatch(
-        addMessage({
-          sender: "bot",
-          message: `${res.message}\n\nGo to ${window.location.origin}/recommended`,
-        })
-      );
-      let xtime = setTimeout(() => {
-        navigate("/recommended");
-        dispatch(closeChat());
-      }, 4000);
-      clearTimeout(xtime);
-    } else {
-      dispatch(
-        addMessage({
-          sender: "bot",
-          message: `Sorry 😔 ${res.message}`,
-        })
-      );
-    }
-    setStatus("online");
-  }
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") sendMessage();
+  };
 
   const handleCloseChat = () => {
     dispatch(clearMessages());
     dispatch(closeChat());
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") sendMessage();
-  };
+  function formatMessageWithMarkdown(text) {
+    // Format bold/italic
+    let formatted = text
+      .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+    // Handle bullet points (lines starting with "* ")
+    const lines = formatted.split("\n");
+    const parsedLines = [];
+    let insideList = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line.startsWith("* ")) {
+        if (!insideList) {
+          parsedLines.push("<ul>");
+          insideList = true;
+        }
+        parsedLines.push("<li>" + line.slice(2) + "</li>");
+      } else {
+        if (insideList) {
+          parsedLines.push("</ul>");
+          insideList = false;
+        }
+        parsedLines.push("<p>" + line + "</p>");
+      }
+    }
+
+    if (insideList) {
+      parsedLines.push("</ul>");
+    }
+
+    // Convert links
+    const finalHTML = parsedLines
+      .join("\n")
+      .replace(
+        /(https?:\/\/[^\s]+)/g,
+        `<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">$1</a>`
+      );
+
+    return <div dangerouslySetInnerHTML={{ __html: finalHTML }} />;
+  }
 
   return (
     <div className="fixed bottom-0 right-0 w-[500px] rounded-l-3xl shadow-lg border border-gray-300 flex flex-col h-full overflow-hidden z-[9999]">
@@ -238,7 +147,7 @@ export default function Chatbot() {
         <div className="flex items-center gap-2">
           <img
             src={mira_profile}
-            alt="profile-pic"
+            alt="Mira AI"
             className="w-10 h-10 rounded-full object-contain border-2 border-blue-500"
           />
           <div className="flex flex-col items-start">
@@ -250,54 +159,54 @@ export default function Chatbot() {
           <TbWindowMinimize
             onClick={() => dispatch(closeChat())}
             className="cursor-pointer text-xl"
-            title="minimize"
+            title="Minimize"
           />
           <IoClose
             onClick={handleCloseChat}
             className="cursor-pointer text-2xl"
-            title="clear chat and close"
+            title="Clear chat and close"
           />
         </div>
       </div>
 
-      {/* Chat messages */}
+      {/* Messages */}
       <div
         ref={chatContainerRef}
         className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-200"
       >
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`max-w-[80%] px-4 py-2 rounded-xl text-sm whitespace-pre-line ${
-              msg.sender === "bot"
-                ? "bg-white text-gray-800 self-start"
-                : "bg-blue-500 text-white self-end ml-auto"
-            }`}
-          >
-            {(() => {
-              const urlRegex = /(https?:\/\/[^\s]+)/g;
-              const parts = msg.message.split(urlRegex);
-              return parts.map((part, i) =>
-                urlRegex.test(part) ? (
-                  <a
-                    key={i}
-                    href={part}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline"
-                  >
-                    {part}
-                  </a>
-                ) : (
-                  <span key={i}>{part}</span>
-                )
-              );
-            })()}
+        {chatsHistory.map((msg, idx) => {
+          if(idx === 0) return;
+          const messageText = msg.parts?.[0]?.text || "";
+          const isBot =
+            msg.role === "model" ||
+            msg.sender === "bot" ||
+            msg.role === "assistant";
+
+          const baseStyle =
+            "px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap shadow-sm transition-transform";
+          const bubbleStyle = isBot
+            ? "bg-gradient-to-br from-white to-gray-100 text-gray-900 self-start rounded-bl-none"
+            : "bg-gradient-to-br from-blue-500 to-blue-600 text-white self-end rounded-br-none ml-auto";
+
+          return (
+            <div
+              key={idx}
+              className={`max-w-[80%] ${baseStyle} ${bubbleStyle} hover:scale-[1.02]`}
+            >
+              {formatMessageWithMarkdown(messageText)}
+            </div>
+          );
+        })}
+
+        {/* Typing Indicator */}
+        {loading && (
+          <div className="w-[80px] px-4 py-2 rounded-xl bg-blue-500 flex justify-center items-center shadow">
+            <DotLoader/>
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Input box */}
+      {/* Input */}
       <div className="flex items-center gap-2 p-3 border-t border-gray-300 bg-white">
         <input
           type="text"
@@ -306,12 +215,14 @@ export default function Chatbot() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          disabled={loading}
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-500 hover:bg-blue-600 transition-colors text-white px-4 py-2 rounded-full text-sm shadow-md"
+          disabled={loading}
+          className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 transition-colors text-white px-4 py-2 rounded-full text-sm shadow-md"
         >
-          Send
+          {loading ? "..." : "Send"}
         </button>
       </div>
     </div>

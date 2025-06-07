@@ -1,6 +1,8 @@
 export default async function apiHandler(pathname, method = "GET", body = null) {
   try {
-    const headers = {};
+    const headers = {
+      "x-api-key": import.meta.env.VITE_APP_API_KEY,
+    };
     const options = {
       method,
       headers,
