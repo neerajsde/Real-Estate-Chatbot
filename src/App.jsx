@@ -36,12 +36,12 @@ function App() {
       {!isOpen && (
         <div
           onClick={() => dispatch(openChat())}
-          className="fixed bottom-8 right-8 z-[9999] bg-pink-200 p-2 shadow-md shadow-gray-500 rounded-full cursor-pointer"
+          className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[9999] bg-pink-200 p-2 shadow-md shadow-gray-500 rounded-full cursor-pointer"
         >
           <img
             src={Logo}
             alt="Logo"
-            className="w-12 h-12 rounded-full object-cover"
+            className="w-8 h-8 md:w-12 md:h-12 rounded-full object-cover"
           />
         </div>
       )}
@@ -50,7 +50,7 @@ function App() {
       {!isOpen && (
         <div
           onClick={() => dispatch(openChat())}
-          className="fixed bottom-10 right-28 z-[9999] flex items-center gap-0.5 cursor-pointer"
+          className="fixed bottom-4 right-20 md:bottom-10 md:right-28 z-[9999] flex items-center gap-0.5 cursor-pointer"
         >
           <div className="relative animate-bounce bg-white py-2 px-3 shadow-md rounded-md text-sm font-medium text-gray-800">
             👋 Hi {isAuthenticated && user ? user.name : "there!"}

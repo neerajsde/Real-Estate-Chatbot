@@ -32,7 +32,7 @@ const SavedProperties = () => {
     return (
       <div className="w-full flex flex-col">
         <Navbar />
-        <div className="flex h-[90vh] flex-col items-center justify-center text-gray-600">
+        <div className="w-full flex h-[90vh] flex-col items-center justify-center text-gray-600">
           <FaHeartBroken className="text-6xl text-red-400 mb-4" />
           <p className="text-xl font-medium">No saved properties yet</p>
           <p className="text-sm text-gray-500 mt-1">
@@ -52,18 +52,18 @@ const SavedProperties = () => {
   return (
     <div className="w-full flex flex-col">
       <Navbar />
-      <div className="p-12">
+      <div className="p-6 md:p-10 lg:p-12">
         {/* Heading + Clear Button */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 md:gap-2">
             <FaBookmark className="text-2xl text-blue-600" />
-            <h2 className="text-2xl font-semibold text-gray-800">
+            <h2 className="text-lg md:text-2xl font-semibold text-gray-800">
               Saved Properties
             </h2>
           </div>
           <button
             onClick={handleClear}
-            className="flex items-center gap-1 text-sm px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            className="flex items-center gap-1 text-sm px-2 md:px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
           >
             <FaTrash /> Clear All
           </button>

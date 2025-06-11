@@ -53,7 +53,7 @@ const UserMenu = ({ user }) => {
       <button
         onClick={toggleMenu}
         type="button"
-        className="flex items-center gap-2 px-3 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition"
+        className="flex items-center gap-2 px-2 py-1 md:px-3 md:py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-100 transition"
       >
         {/* User Avatar */}
         <img

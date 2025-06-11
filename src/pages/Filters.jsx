@@ -58,9 +58,9 @@ const Filters = () => {
   return (
     <div className="w-full flex flex-col">
       <Navbar />
-      <div className="flex h-[87vh] overflow-hidden">
+      <div className="w-full flex flex-col md:flex-row md:h-[87vh] overflow-hidden">
         {/* Sidebar */}
-        <div className="w-[300px] bg-white border-r border-gray-300 h-full overflow-y-auto p-4 sticky top-0">
+        <div className="w-full md:w-[300px] bg-white border-r border-gray-300 h-full overflow-y-auto p-4 sticky top-0">
           <h2 className="text-xl font-semibold mb-4">Filters</h2>
           <FilterInputs
             allProperties={propertyData}
@@ -94,14 +94,14 @@ const Filters = () => {
             </form>
 
             {/* Tabs */}
-            <div className="flex space-x-2">
+            <div className="md:flex hidden space-x-2">
               <button
-                className={`px-4 py-2 rounded bg-blue-500 text-white cursor-pointer`}
+                className={`px-2 md:px-4 py-2 rounded bg-blue-500 text-white cursor-pointer`}
               >
                 Filters
               </button>
               <button
-                className={`px-4 py-2 border border-gray-400 rounded bg-gray-200 cursor-pointer`}
+                className={`px-2 md:px-4  py-2 border border-gray-400 rounded bg-gray-200 cursor-pointer`}
                 onClick={() => navigate("/recommended")}
               >
                 Recommended Properties

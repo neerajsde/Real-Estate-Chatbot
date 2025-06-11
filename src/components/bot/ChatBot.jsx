@@ -141,7 +141,7 @@ export default function Chatbot() {
   }
 
   return (
-    <div className="fixed bottom-0 right-0 w-[500px] rounded-l-3xl shadow-lg border border-gray-300 flex flex-col h-full overflow-hidden z-[9999]">
+    <div className="fixed bottom-0 right-0 w-full md:w-[500px] h-[80vh] md:h-full rounded-t-2xl md:rounded-l-3xl shadow-lg border border-gray-300 flex flex-col overflow-hidden z-[9999]">
       {/* Header */}
       <div className="flex justify-between items-center gap-2 px-4 py-2 border-b border-gray-300 bg-white">
         <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ export default function Chatbot() {
       {/* Messages */}
       <div
         ref={chatContainerRef}
-        className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-200"
+        className="flex-1 p-2 md:p-4 overflow-y-auto space-y-3 bg-gray-200"
       >
         {chatsHistory.map((msg, idx) => {
           if(idx === 0) return;
